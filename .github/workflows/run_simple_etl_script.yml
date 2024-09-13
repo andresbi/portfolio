@@ -1,0 +1,26 @@
+name: Run Script
+
+on:
+  schedule:
+    - cron: '5 13 * * 5'  # “At 13:05 on Friday. UTC?”
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'  # Specify your Python version
+
+    - name: Install dependencies
+      run: |
+        pip install pandas requests sqlite3  
+
+    - name: Run script
+      run: |
+        python etl_script.py  
