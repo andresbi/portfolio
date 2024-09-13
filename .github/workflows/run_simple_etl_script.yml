@@ -25,4 +25,4 @@ jobs:
 
     - name: Run script
       run: |
-        python etl_script.py  
+        python simple_etl/etl_script.py  
