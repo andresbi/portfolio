@@ -1,7 +1,7 @@
 import pandas as pd 
 import requests
-
-
+from db_utils import load_to_db, get_results_sql
+import sqlite3
 def fetch_data(url):
     response = requests.get(url)
     response.raise_for_status()  # Raise an HTTPError for bad responses
@@ -37,10 +37,17 @@ def main():
         normalize_df(comment_df)
     else:
         comment_df = pd.DataFrame()
-    
-    print(comment_df.head(40))
-    print(post_df.head(40))
 
+    df_to_load = {
+        'posts':post_df,
+        'comments':comment_df
+        }
+    
+    load_to_db(df_to_load,db_name='etl_script.db')
+
+    get_results_sql("SELECT name, count(1) amnt FROM comments group by name order by name desc", db_name='etl_script.db')
+
+   
 
 def normalize_df(df):
     if 'email' in df.columns:
@@ -55,3 +62,4 @@ def normalize_df(df):
 
 
 main()
+
