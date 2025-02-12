@@ -3,7 +3,7 @@ name: Run Script
 on:
   schedule:
     - cron: '5 13 * * 5'  # “At 13:05 on Friday. UTC?”
-  workflow_dispatch:  # This allows manual triggering.
+  workflow_dispatch:  # This allows manual triggering
 
 
 jobs:
