@@ -1,0 +1,71 @@
+import os
+from datetime import datetime, timedelta
+from cosmos import DbtTaskGroup, ProjectConfig, ProfileConfig, RenderConfig
+from airflow.operators.empty import EmptyOperator
+from airflow.decorators import dag
+from dotenv import load_dotenv
+from airflow.operators.python import PythonOperator
+
+from dags.capstone.python_scripts.load_polygon_into_snowflake import load_polygon_main 
+from dags.capstone.python_scripts.load_treasury_into_snowflake import load_treasury_main 
+
+
+dbt_env_path = os.path.join(os.environ['AIRFLOW_HOME'], 'dbt_capstone_andres', 'dbt.env')
+load_dotenv(dbt_env_path)
+
+# Retrieve environment variables
+airflow_home = os.getenv('AIRFLOW_HOME')
+PATH_TO_DBT_PROJECT = f'{airflow_home}/dags/capstone/dbt_capstone_andres'
+PATH_TO_DBT_PROFILES = f'{airflow_home}/dags/capstone/dbt_capstone_andres/profiles.yml'
+
+profile_config = ProfileConfig(
+    profile_name="dbt_capstone_andres",
+    target_name="dev",
+    profiles_yml_filepath=PATH_TO_DBT_PROFILES,
+)
+
+default_args = {
+  "owner": "Andres",
+  "retries": 1,
+  "execution_timeout": timedelta(hours=1),
+}
+
+@dag(
+    start_date=datetime(2024, 11, 17),
+    # schedule='@once',
+    schedule="0 1 * * *",
+    catchup=True,
+    default_args=default_args,
+)
+def capstone_andres_dag_():
+    load_polygon_data_task = PythonOperator(
+    task_id='load_polygon_data_task',
+    python_callable=load_polygon_main,
+    depends_on_past=True,
+    op_kwargs={
+        "date_to_ingest": '{{ yesterday_ds }}'
+    },
+    )
+
+    load_treasury_data_task = PythonOperator(    
+    task_id='load_treasury_data_task',
+    python_callable=load_treasury_main,
+    depends_on_past=True,
+    op_kwargs={
+        "date_to_ingest": '{{ yesterday_ds }}'
+    },
+    )
+
+    dbt_build_weekly_metrics_task = DbtTaskGroup(
+        group_id="dbt_build_weekly_metrics_task",
+        project_config=ProjectConfig(PATH_TO_DBT_PROJECT),
+        profile_config=profile_config,
+        render_config=RenderConfig(
+            select=["+weekly_metrics"],
+        ),
+    )
+
+    # Define task dependencies.
+    load_polygon_data_task >> load_treasury_data_task >> dbt_build_weekly_metrics_task
+
+capstone_andres_dag_()
