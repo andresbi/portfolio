@@ -1,0 +1,62 @@
+version: 2
+
+sources:
+  - name: treasury
+    database: dataexpert_student
+    schema: andres
+    tables:
+      - name: fiscal_data
+        freshness:
+          warn_after:
+            count: 30
+            period: day
+          error_after:
+            count: 50
+            period: day
+        loaded_at_field: "record_date::timestamp"
+  - name: polygon
+    database: dataexpert_student
+    schema: andres
+    tables:
+      - name: daily_bars
+
+models:
+  - name: audit_weekly_metrics
+    description: "This aggregated table summarizes orders by date, status, and payment method, providing the total amount for each combination."
+    columns:
+      - name: week_start_date
+        tests:
+          - unique
+          - not_null
+       
+unit_tests:
+  - name: test_amount_sum
+    model: audit_weekly_metrics
+    given:
+      - input: ref('stg_daily_bars')
+        format: csv
+        rows: |
+          date,ticker,number_of_shares_traded,number_of_trades
+          2020-11-20,'L',100,10
+          2020-11-20,'S',200,20
+          2020-11-21,'L',300,40
+          2020-11-21,'S',200,50
+      - input: ref('stg_treasury_revenue_collections')
+        format: csv
+        rows: |
+          collection_date,tax_category,dollars_collected_by_treasury
+          2020-11-20,IRS Tax,1000
+          2020-11-20,IRS Non Tax,2000
+          2020-11-21,IRS Tax,3000
+          2020-11-21,IRS Tax,2000
+      - input: ref('dim_date')
+        format: csv
+        rows: |
+          date_day,week_start_date
+          2020-11-20, 2020-11-15
+          2020-11-21, 2020-11-15
+    expect:
+      format: csv
+      rows: |
+          week_start_date,number_of_shares_traded,number_of_trades,dollars_collected_by_treasury,irs_tax_dollars_collected_by_treasury
+          2020-11-15,800,120,8000,6000

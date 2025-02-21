@@ -1,0 +1,13 @@
+dbt_capstone_andres:
+  outputs:
+    dev:
+      account: aab46027.us-west-2
+      database: DATAEXPERT_STUDENT
+      password: DataExpert123!
+      role: ALL_USERS_ROLE
+      schema: andres
+      threads: 1
+      type: snowflake
+      user: dataexpert_student
+      warehouse: COMPUTE_WH
+  target: dev
