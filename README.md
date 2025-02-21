@@ -4,10 +4,10 @@ I store any practice projects I do to improve my skills. I am on a journey from 
 
 Contents:
 
-[Tableau Project](https://public.tableau.com/views/insights_and_viz/Actions?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)
+[Pandas Visualizations Project](pandas_project/readme.md)
+
+[airflow-dbt Project](airflow-dbt/project_writeup.md)
 
 [Simple ETL Script](simple_etl/etl_script.py)
 
-[Pandas Project](pandas_project/readme.md)
-
-[airflow-dbt Project](airflow-dbt/project_writeup.md)
+[Tableau Project](https://public.tableau.com/views/insights_and_viz/Actions?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)
