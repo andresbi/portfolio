@@ -1,0 +1,52 @@
+import os
+from datetime import datetime, timedelta
+from cosmos import DbtTaskGroup, ProjectConfig, ProfileConfig, RenderConfig
+from airflow.operators.empty import EmptyOperator
+from airflow.decorators import dag
+from dotenv import load_dotenv
+
+dbt_env_path = os.path.join(os.environ['AIRFLOW_HOME'], 'dbt_capstone_andres', 'dbt.env')
+load_dotenv(dbt_env_path)
+
+# Retrieve environment variables
+airflow_home = os.getenv('AIRFLOW_HOME')
+PATH_TO_DBT_PROJECT = f'{airflow_home}/dags/capstone/dbt_capstone_andres'
+PATH_TO_DBT_PROFILES = f'{airflow_home}/dags/capstone/dbt_capstone_andres/profiles.yml'
+
+profile_config = ProfileConfig(
+    profile_name="dbt_capstone_andres",
+    target_name="dev",
+    profiles_yml_filepath=PATH_TO_DBT_PROFILES,
+)
+
+default_args = {
+  "owner": "Andres",
+  "retries": 0,
+  "execution_timeout": timedelta(hours=1),
+}
+
+@dag(
+    start_date=datetime(2024, 5, 9),
+    schedule='@once',
+    catchup=False,
+    default_args=default_args,
+)
+def dbt_dag_cosmos_DbtTaskGroup():
+    pre_dbt_workflow = EmptyOperator(task_id="pre_dbt_workflow")
+
+    dbt_run_staging = DbtTaskGroup(
+        group_id="build_poly_treasury_mart",
+        project_config=ProjectConfig(PATH_TO_DBT_PROJECT),
+        profile_config=profile_config,
+        render_config=RenderConfig(
+            select=["+weekly_metrics"],
+        ),
+    )
+
+    # Post DBT workflow task
+    post_dbt_workflow = EmptyOperator(task_id="post_dbt_workflow", trigger_rule="all_done")
+
+    # Define task dependencies
+    pre_dbt_workflow >> dbt_run_staging >> post_dbt_workflow
+
+dbt_dag_cosmos_DbtTaskGroup()

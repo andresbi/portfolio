@@ -1,0 +1,30 @@
+-- back compat for old kwarg name
+  
+  begin;
+    
+        
+            
+            
+        
+    
+
+    
+
+    merge into DATAEXPERT_STUDENT.andres.weekly_metrics as DBT_INTERNAL_DEST
+        using DATAEXPERT_STUDENT.andres.weekly_metrics__dbt_tmp as DBT_INTERNAL_SOURCE
+        on (
+                DBT_INTERNAL_SOURCE.week_start_date = DBT_INTERNAL_DEST.week_start_date
+            )
+
+    
+    when matched then update set
+        "WEEK_START_DATE" = DBT_INTERNAL_SOURCE."WEEK_START_DATE","NUMBER_OF_SHARES_TRADED" = DBT_INTERNAL_SOURCE."NUMBER_OF_SHARES_TRADED","NUMBER_OF_TRADES" = DBT_INTERNAL_SOURCE."NUMBER_OF_TRADES","DOLLARS_COLLECTED_BY_TREASURY" = DBT_INTERNAL_SOURCE."DOLLARS_COLLECTED_BY_TREASURY","IRS_TAX_DOLLARS_COLLECTED_BY_TREASURY" = DBT_INTERNAL_SOURCE."IRS_TAX_DOLLARS_COLLECTED_BY_TREASURY"
+    
+
+    when not matched then insert
+        ("WEEK_START_DATE", "NUMBER_OF_SHARES_TRADED", "NUMBER_OF_TRADES", "DOLLARS_COLLECTED_BY_TREASURY", "IRS_TAX_DOLLARS_COLLECTED_BY_TREASURY")
+    values
+        ("WEEK_START_DATE", "NUMBER_OF_SHARES_TRADED", "NUMBER_OF_TRADES", "DOLLARS_COLLECTED_BY_TREASURY", "IRS_TAX_DOLLARS_COLLECTED_BY_TREASURY")
+
+;
+    commit;
