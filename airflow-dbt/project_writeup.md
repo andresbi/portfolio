@@ -2,18 +2,31 @@
 ====================
 
 **Table of Contents**
-- [Getting Started](#getting-started)
-- [Prerequisites](#prerequisites)
-- [Local Development](#local-development)
-- [Debugging](#debugging)
-- [dbt Project Setup](#dbt-project-setup)
-- [Homework Submission](#homework-submission)
-- [dbt airflow Assignment](#dbt-airflow-assignment)
+- Purpose of the project
+- Local Development
+- Dataset
+- Tech Choices
+- Data Model
+- Steps Followed
+- Challenges
+- Possible Future Enhancements
+- Data Quality
 
 **Purpose of the project:**
 1) First objective: Learn how to use Airflow/Cosmos with dbt core 
 2) Future Objective: Track interesting economic macro stats about the US economy that are not easily obtained from google searches, Such as growing debt size and its relation to tax revenue collections. 
 Note: The intention is to continue growing this project beyond the initial state. 
+
+
+**Local Development:**
+Airflow/Astronomer Commands on CLI:
+Astro dev start, restart, stop
+Astro login
+Docker-compose ps → to list the containers running on docker 
+Astro dev bash or docker exec -it <container-id> /bin/bash (using the scheduler name in the container-id.--> This will allow you to Run a bash command in a locally running Docker container for an Airflow component. 
+airflow dags backfill -s 2024-11-10 -e 2024-11-16 capstone_andres_dag_
+airflow tasks test capstone_andres_dag_ load_treasury_data_task 2024-11-11
+Control D to exit
 
 
 **Dataset:**
