@@ -1,1 +1,0 @@
-select * from dataexpert_student.andres.fiscal_data
